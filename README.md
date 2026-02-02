@@ -10,14 +10,15 @@ Este repositório contém scripts voltados para inspeção rápida do banco e va
 
 O `sqlhelp.py` é um utilitário de linha de comando para inspecionar rapidamente a **estrutura (schema)** de tabelas no PostgreSQL.
 
-### Objetivo
-
-O objetivo do SQL Helper é fornecer um **feedback visual rápido** das entidades do banco — isto é, uma forma simples de consultar:
-
 - nomes das colunas
 - tipos
 - nullable
 - defaults
+
+### Commands
+
+make sql+nome_da_tabela
+- Exemplo: make sqlnfe
 
 Sem precisar abrir IDE, DBeaver, pgAdmin ou escrever queries manualmente.
 
