@@ -93,6 +93,19 @@ Scripts de feeback visual dos outputs relacionados as pipeline ETL em cada etapa
 - **Pagamento** => `make view-pagamento`
 
 
+Adoto um estilo de representação e modelagem orientado à imutabilidade e a transformações determinísticas de estado, inspirado em princípios de **Railway Programming**, no qual cada transição ocorre de forma explícita, previsível e validada.  
+
+Os objetos são tratados como estruturas imutáveis, e qualquer evolução ocorre por meio da geração de novas instâncias derivadas, depois de passar por validações explícitas de contratos, regras de domínio e invariantes, reduzindo efeitos colaterais e aumentando previsibilidade.
+
+**commitment →** Iniciação do objeto e alocaçãço de recurso  
+
+**liquidation →** Inserção de outro objeto recurso, dando origem a outro objeto com outro estado  
+
+**complete →** checagem de boundaries  
+
+Sempre que um objeto composto por dependências é instanciado — como uma Transaction que agrega múltiplas entidades — é seguro assumir que todos os objetos envolvidos já passaram por seus contratos de validação.  
+
+Dessa forma, a consistência do objeto agregado é garantida não só por suas regras, tanto quanto pelas regras internas e invariantes de cada componente que faz parte da agregação.
 ```bash
 
 ### 3. Ciclo de Vida do Contrato (Transaction Lifecycle)
