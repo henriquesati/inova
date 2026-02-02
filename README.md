@@ -41,7 +41,13 @@ As tabelas presentes no banco (conforme dicionário de dados) são:
 
 ---
 
-## Views (`/views')
+## Views  (/views)
+
+Feedback visual do Output ETL relacionado a cada etapa do lifecycle da transação
+
+- Empenho => make view-empenho
+- Liquidação => make view-liquidacao
+- Pagamento => make view-pagamento
 
 ```bash
 python3 sqlhelp.py <nome_tabela>
