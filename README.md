@@ -20,7 +20,8 @@ O `sqlhelp.py` é um utilitário de linha de comando para inspecionar rapidament
 make sql+nome_da_tabela
 __Exemplo:__ make sqlnfe
 
-> O script não cria nem altera tabelas: ele apenas consulta metadados. <br/>
+> make sqlnfe
+> make sql-contrato
 
 ---
 
