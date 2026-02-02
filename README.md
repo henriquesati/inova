@@ -42,13 +42,13 @@ As tabelas presentes no banco (conforme dicionário de dados) são:
 
 📌 Entidade Administrativa
 
-Entidade (1) ──── (N) Contrato
+Entidade (1) ──── (N) Contrato<br>
 Entidade (1) ──── (N) Empenho
 
 📌 Fornecedor
 
-Fornecedor (1) ──── (N) Contrato
-Fornecedor (1) ──── (N) Empenho
+Fornecedor (1) ──── (N) Contrato<br>
+Fornecedor (1) ──── (N) Empenho<br>
 Fornecedor (1) ──── (N) NFe
 
 📌 Contrato
@@ -57,26 +57,26 @@ Contrato (1) ──── (N) Empenho
 
 📌 Empenho
 
-Empenho (1) ──── (N) LiquidacaoNotaFiscal
-Empenho (1) ──── (N) Pagamento
+Empenho (1) ──── (N) LiquidacaoNotaFiscal<br>
+Empenho (1) ──── (N) Pagamento<br>
 
 📌 Liquidação / Nota Fiscal
 
-LiquidacaoNotaFiscal (1) ──── (1) NFe
+LiquidacaoNotaFiscal (1) ──── (1) NFe<br>
 
 📌 Nota Fiscal Eletrônica (NFe)
 
-NFe (1) ──── (N) NFePagamento
+NFe (1) ──── (N) NFePagamento<br>
 
 📌 Pagamento
 
-Pagamento (1) ──── (N) NFePagamento
+Pagamento (1) ──── (N) NFePagamento<br>
 
-📌 Relação Indireta (via tabela associativa)
+📌 Relação Indireta (via tabela associativa)<br>
 
 NFe (N) ──── (N) Pagamento
 
-🔴 Relações 1-to-1 críticas (invariantes de domínio)
+🔴 Relações 1-to-1 críticas (invariantes de domínio)<br>
 
 LiquidacaoNotaFiscal (1) ──── (1) NFe
 ---
