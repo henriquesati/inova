@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from  datetime import date
 from decimal import Decimal
 from typing import Optional
+from result import Result
 
 @dataclass
 class Contrato:

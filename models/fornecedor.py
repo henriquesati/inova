@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from result import Result
+from db_connection import get_db_connection
 
 @dataclass
 class Fornecedor:
@@ -44,3 +45,27 @@ class Fornecedor:
             return obj.validate()
         except Exception as e:
             return Result.err(f"Erro ao instanciar Fornecedor: {str(e)}")
+
+    @staticmethod
+    def get_by_id(id_fornecedor: int) -> Result["Fornecedor"]:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM fornecedor WHERE id_fornecedor = %s", (id_fornecedor,))
+            row = cursor.fetchone()
+            
+            if not row:
+                 cursor.close()
+                 conn.close()
+                 return Result.err(f"Fornecedor com id {id_fornecedor} não encontrado.")
+
+            columns = [desc[0] for desc in cursor.description]
+            row_dict = dict(zip(columns, row))
+            
+            cursor.close()
+            conn.close()
+            
+            return Fornecedor.from_row(row_dict)
+            
+        except Exception as e:
+            return Result.err(f"Erro ao buscar Fornecedor: {str(e)}")

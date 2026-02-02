@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from result import Result
+from db_connection import get_db_connection
 
 @dataclass
 class Entidade:
@@ -58,3 +59,40 @@ class Entidade:
             return ent.validate()
         except Exception as e:
             return Result.err(f"Erro ao instanciar Entidade: {str(e)}")
+
+    @staticmethod
+    def _fetch_raw(id_entidade: int) -> Result[tuple]:
+        """Busca o dado cru no banco e retorna (row, description)."""
+        conn = None
+        cursor = None
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM entidade WHERE id_entidade = %s", (id_entidade,))
+            row = cursor.fetchone()
+            description = cursor.description
+            return Result.ok((row, description))
+        except Exception as e:
+            return Result.err(f"Erro de conexão/consulta: {str(e)}")
+        finally:
+            if cursor: cursor.close()
+            if conn: conn.close()
+
+    @staticmethod
+    def _validate_db_return(data: tuple) -> Result[dict]:
+        """Valida o retorno do banco: Se row é None, retorna erro. Se ok, mapeia para dict."""
+        row, description = data
+        if row is None:
+             return Result.err("Entidade não encontrada.")
+        
+        columns = [desc[0] for desc in description]
+        return Result.ok(dict(zip(columns, row))) ##tuple  --> dictionary
+
+    @staticmethod
+    def get_by_id(id_entidade: int) -> Result["Entidade"]:
+        """Pipeline declarativo: Fetch -> Validate -> Map"""
+        return (
+            Entidade._fetch_raw(id_entidade)
+            .bind(Entidade._validate_db_return)
+            .bind(Entidade.from_row)
+        )

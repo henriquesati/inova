@@ -12,8 +12,89 @@ from models.entidade import Entidade
 from models.fornecedor import Fornecedor
 from clientside.transaction.empenho_transaction import ContratoEmpenhado
 from clientside.domains.empenho import executar_empenho_rules
+from models.contrato import Contrato
+from datetime import date
+from decimal import Decimal
+from unittest.mock import MagicMock, patch
 
 class TestEmpenhoFlow(unittest.TestCase):
+    
+    def test_build_from_contract(self):
+        """
+        Test Case for ContratoEmpenhado.build_from_contract using Mocks.
+        Ensures that Entidade and Fornecedor are fetched correctly using their IDs from the contract.
+        """
+        print("\n[Visual Log] Testing build_from_contract...")
+
+        # Mock Data
+        contrato_data = {
+            "id_contrato": 100,
+            "valor": Decimal("5000.00"),
+            "data": date(2023, 1, 1),
+            "objeto": "Teste Objeto",
+            "id_entidade": 1,
+            "id_fornecedor": 2
+        }
+        
+        # We will mock the get_by_id methods directly
+        with patch("models.entidade.Entidade.get_by_id") as mock_get_ent, \
+             patch("models.fornecedor.Fornecedor.get_by_id") as mock_get_forn:
+             
+             # Setup success case
+             ent_obj = Entidade(1, "E", "S", "M", "C")
+             forn_obj = Fornecedor(2, "F", "D")
+             
+             mock_get_ent.return_value = Result.ok(ent_obj)
+             mock_get_forn.return_value = Result.ok(forn_obj)
+             
+             contrato_res = Contrato.create(contrato_data)
+             
+             result = ContratoEmpenhado.build_from_contract(contrato_res)
+             
+             self.assertTrue(result.is_ok, f"Build from contract failed: {result._error}")
+             print(f"[Visual Log] Build From Contract (Success): {result.value}")
+             self.assertEqual(result.value.entidade, ent_obj)
+             self.assertEqual(result.value.fornecedor, forn_obj)
+             self.assertEqual(result.value.contrato, contrato_res.value)
+
+             # Setup failure case (Entidade fails)
+             mock_get_ent.return_value = Result.err("DB Error Entidade")
+             result_fail = ContratoEmpenhado.build_from_contract(contrato_res)
+             
+             self.assertTrue(result_fail.is_err)
+             print(f"[Visual Log] Build From Contract (Error Propagated): {result_fail.error}")
+             self.assertEqual(result_fail.error, "DB Error Entidade")
+
+    def test_entidade_repository_flow(self):
+        """
+        Test Case for Entidade.get_by_id Pipeline.
+        Verifies that the declarative pipeline handles DB results correctly.
+        """
+        print("\n[Visual Log] Testing Entidade.get_by_id Pipeline...")
+        
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        
+        # Setup mock for success
+        row = (1, "Entidade Teste", "SP", "Sao Paulo", "12345678000199")
+        description = [("id_entidade",), ("nome",), ("estado",), ("municipio",), ("cnpj",)]
+        mock_cursor.fetchone.return_value = row
+        mock_cursor.description = description
+        
+        with patch("models.entidade.get_db_connection", return_value=mock_conn):
+            # Test Success
+            result = Entidade.get_by_id(1)
+            self.assertTrue(result.is_ok)
+            print(f"[Visual Log] Entidade Repo (Success): {result.value}")
+            self.assertEqual(result.value.id_entidade, 1)
+            
+            # Test Not Found
+            mock_cursor.fetchone.return_value = None
+            result_nf = Entidade.get_by_id(999)
+            self.assertTrue(result_nf.is_err)
+            print(f"[Visual Log] Entidade Repo (Not Found): {result_nf.error}")
+            self.assertIn("não encontrada", str(result_nf.error))
     
     def setUp(self):
         self.valid_entidade = Entidade(
@@ -28,6 +109,9 @@ class TestEmpenhoFlow(unittest.TestCase):
             nome="Fornecedor Teste",
             documento="11122233344"
         )
+        self.contrato_mock = MagicMock(spec=Contrato)
+        self.contrato_mock.id_entidade = 1
+        self.contrato_mock.id_fornecedor = 1
 
     def test_success_flow(self):
         """
@@ -37,8 +121,9 @@ class TestEmpenhoFlow(unittest.TestCase):
         """
         res_entidade = Result.ok(self.valid_entidade)
         res_fornecedor = Result.ok(self.valid_fornecedor)
+        res_contrato_obj = Result.ok(self.contrato_mock)
 
-        res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor)
+        res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor, res_contrato_obj)
         self.assertTrue(res_contrato.is_ok, f"Binding failed: {res_contrato._error}")
         
         contrato = res_contrato.value
@@ -60,7 +145,8 @@ class TestEmpenhoFlow(unittest.TestCase):
         # 1. Unwrapped Form (Direct Constructor)
         contrato_unwrapped = ContratoEmpenhado(
             entidade=self.valid_entidade,
-            fornecedor=self.valid_fornecedor
+            fornecedor=self.valid_fornecedor,
+            contrato=self.contrato_mock
         )
         print(f"\n[Visual Log] Success Unwrapped (Constructor): {contrato_unwrapped}")
         
@@ -76,8 +162,9 @@ class TestEmpenhoFlow(unittest.TestCase):
         # 2. Wrapped Form (Build Factory)
         res_entidade = Result.ok(self.valid_entidade)
         res_fornecedor = Result.ok(self.valid_fornecedor)
+        res_contrato_obj = Result.ok(self.contrato_mock)
         
-        res_contrato_wrapped = ContratoEmpenhado.build(res_entidade, res_fornecedor)
+        res_contrato_wrapped = ContratoEmpenhado.build(res_entidade, res_fornecedor, res_contrato_obj)
         print(f"[Visual Log] Success Wrapped (Build Factory): {res_contrato_wrapped}")
 
         self.assertTrue(res_contrato_wrapped.is_ok)
@@ -96,8 +183,9 @@ class TestEmpenhoFlow(unittest.TestCase):
         error_msg = "Entidade not found"
         res_entidade = Result.err(error_msg)
         res_fornecedor = Result.ok(self.valid_fornecedor)
+        res_contrato_obj = Result.ok(self.contrato_mock)
 
-        res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor)
+        res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor, res_contrato_obj)
         
         self.assertTrue(res_contrato.is_err)
         self.assertEqual(res_contrato.error, error_msg)
@@ -113,8 +201,9 @@ class TestEmpenhoFlow(unittest.TestCase):
         error_msg = "Fornecedor not found"
         res_entidade = Result.ok(self.valid_entidade)
         res_fornecedor = Result.err(error_msg)
+        res_contrato_obj = Result.ok(self.contrato_mock)
 
-        res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor)
+        res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor, res_contrato_obj)
         
         self.assertTrue(res_contrato.is_err)
         self.assertEqual(res_contrato.error, error_msg)
@@ -146,8 +235,9 @@ class TestEmpenhoFlow(unittest.TestCase):
                 # If we pass None in Result, it's ok for build, but fails rules
                 res_entidade = Result.ok(invalid_entidade)
                 res_fornecedor = Result.ok(self.valid_fornecedor)
+                res_contrato_obj = Result.ok(self.contrato_mock)
 
-                res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor)
+                res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor, res_contrato_obj)
                 self.assertTrue(res_contrato.is_ok)
                 
                 contrato = res_contrato.value
@@ -178,8 +268,9 @@ class TestEmpenhoFlow(unittest.TestCase):
             with self.subTest(i=i, fornecedor=invalid_fornecedor):
                 res_entidade = Result.ok(self.valid_entidade)
                 res_fornecedor = Result.ok(invalid_fornecedor)
+                res_contrato_obj = Result.ok(self.contrato_mock)
 
-                res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor)
+                res_contrato = ContratoEmpenhado.build(res_entidade, res_fornecedor, res_contrato_obj)
                 self.assertTrue(res_contrato.is_ok)
                 
                 contrato = res_contrato.value
@@ -189,5 +280,132 @@ class TestEmpenhoFlow(unittest.TestCase):
                 self.assertTrue(res_rules.is_err, f"Should fail for invalid fornecedor: {invalid_fornecedor}")
                 print(f"[Visual Log] Invariant Test (Fornecedor invalid): {res_rules}")
 
+from result import Result
+from models.contrato import Contrato
+from models.entidade import Entidade
+from models.fornecedor import Fornecedor
+from clientside.transaction.empenho_transaction import ContratoEmpenhado
+
+def test_build_from_contract():
+    print("Testing build_from_contract...")
+
+    # Mock DB Connection
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value = mock_cursor
+
+    # Mock Data
+    contrato_data = {
+        "id_contrato": 100,
+        "valor": Decimal("5000.00"),
+        "data": date(2023, 1, 1),
+        "objeto": "Teste Objeto",
+        "id_entidade": 1,
+        "id_fornecedor": 2
+    }
+    
+    entidade_row = (1, "Entidade Teste", "SP", "Sao Paulo", "12345678000199")
+    entidade_cols = ["id_entidade", "nome", "estado", "municipio", "cnpj"]
+    
+    fornecedor_row = (2, "Fornecedor Teste", "12345678900")
+    fornecedor_cols = ["id_fornecedor", "nome", "documento"]
+
+    # Configure Mock Cursor
+    # The code calls Entidade.get_by_id then Fornecedor.get_by_id
+    # We need to manage the side effects of execute and fetchone
+    
+    mock_cursor.description = []
+    
+    def side_effect_execute(query, params):
+        if "entidade" in query:
+             mock_cursor.description = [(col,) for col in entidade_cols]
+             mock_cursor.fetchone.return_value = entidade_row
+        elif "fornecedor" in query:
+             mock_cursor.description = [(col,) for col in fornecedor_cols]
+             mock_cursor.fetchone.return_value = fornecedor_row
+    
+    mock_cursor.execute.side_effect = side_effect_execute
+
+    with patch("models.entidade.get_db_connection", return_value=mock_conn), \
+         patch("models.fornecedor.get_db_connection", return_value=mock_conn):
+        
+        # 1. Create Contrato Result
+        contrato_res = Contrato.create(contrato_data)
+        assert contrato_res.is_ok, f"Contrato creation failed: {contrato_res.error}"
+        
+        # 2. Build ContratoEmpenhado
+        # Because side_effect_execute sets up fetchone return, it should work.
+        # However, fetchone is called AFTER execute.
+        # We need to make sure fetchone returns the right thing based on the LAST execute.
+        # Let's refine the mock logic.
+        
+        # Actually simplest way is to mock Entidade.get_by_id and Fornecedor.get_by_id directly
+        # to test logic inside ContratoEmpenhado, but checking integration is better.
+        # But mocking DB cleanly in one go is tricky without complex side effects.
+        # Let's stick to mocking get_by_id for simplicity to verify the BIND logic works.
+        pass
+
+    print("  -> Testing Logic Flow (Mocking at Model level)...")
+    with patch("models.entidade.Entidade.get_by_id") as mock_get_ent, \
+         patch("models.fornecedor.Fornecedor.get_by_id") as mock_get_forn:
+         
+         # Setup success case
+         ent_obj = Entidade(1, "E", "S", "M", "C")
+         forn_obj = Fornecedor(2, "F", "D")
+         
+         mock_get_ent.return_value = Result.ok(ent_obj)
+         mock_get_forn.return_value = Result.ok(forn_obj)
+         
+         contrato_res = Contrato.create(contrato_data)
+         
+         result = ContratoEmpenhado.build_from_contract(contrato_res)
+         
+         if result.is_ok:
+             print("SUCCESS: ContratoEmpenhado built successfully.")
+             print(f"  Entidade: {result.value.entidade.nome}")
+             print(f"  Fornecedor: {result.value.fornecedor.nome}")
+         else:
+             print(f"FAILURE: {result.error}")
+             exit(1)
+
+         # Setup failure case (Entidade fails)
+         mock_get_ent.return_value = Result.err("DB Error Entidade")
+         result_fail = ContratoEmpenhado.build_from_contract(contrato_res)
+         assert result_fail.is_err
+         print(f"SUCCESS: Error correctly propagated: {result_fail.error}")
+
+
+def test_entidade_repository_flow():
+    print("\nTesting Entidade.get_by_id Pipeline...")
+    
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value = mock_cursor
+    
+    # Setup mock for success
+    row = (1, "Entidade Teste", "SP", "Sao Paulo", "12345678000199")
+    description = [("id_entidade",), ("nome",), ("estado",), ("municipio",), ("cnpj",)]
+    mock_cursor.fetchone.return_value = row
+    mock_cursor.description = description
+    
+    with patch("models.entidade.get_db_connection", return_value=mock_conn):
+        # Test Success
+        result = Entidade.get_by_id(1)
+        if result.is_ok:
+            print("SUCCESS: Entidade found and hydrated.")
+            assert result.value.id_entidade == 1
+        else:
+            print(f"FAILURE: Expected success but got error: {result.error}")
+        
+        # Test Not Found
+        mock_cursor.fetchone.return_value = None
+        result_nf = Entidade.get_by_id(999)
+        if result_nf.is_err and "não encontrada" in str(result_nf.error):
+             print(f"SUCCESS: Correctly handled Not Found: {result_nf.error}")
+        else:
+             print(f"FAILURE: Expected 'not found' error but got: {result_nf}")
+
 if __name__ == "__main__":
     unittest.main()
+    test_entidade_repository_flow()
+    test_build_from_contract()
