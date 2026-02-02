@@ -45,16 +45,12 @@ As tabelas presentes no banco (conforme dicionário de dados) são:
 
 Scripts de feeback visual dos outputs relacionados as pipeline ETL em cada etapa do ciclo de vida da transação.
 
-- **Empenho**: `make view-empenhos`
-  Visualiza extração e validação de empenhos (Contrato -> Empenho).
+- **Empenho** => `make view-empenhos`
 
-- **Liquidação**: `make view-liquidacao`
-  Visualiza o fluxo de liquidação (Liquidacao -> NFe).
+- **Liquidação** => `make view-liquidacao`
 
-- **Pagamento**: `make view-pagamento`
-  Visualiza o processamento de pagamentos.
+- **Pagamento** => `make view-pagamento`
 
-> **Nota:** Certifique-se de que os scripts correspondentes existam em `/views`.
 
 ```bash
 python3 sqlhelp.py <nome_tabela>
