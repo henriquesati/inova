@@ -50,12 +50,36 @@ As tabelas presentes no banco (conforme dicionário de dados) são:
 python3 sqlhelp.py <nome_tabela>
 
 
-### 2) Escopos de teste
-**Exemplos de perguntas para investigar** **(você pode e deve criar outras)**:
 
-- Há pagamentos sem empenhos correspondentes?
-- Existem contratos com pagamentos acima do valor total contratado?
---------- indagações-------
-- essa entidade que tem relação one-to-one ta tendo a propriedade quebrada? Ex: mesma nf compartilhada como comprovante por multiplos contratos
-- data de criação da nf bate com a data de pagamento? Ex: criada antes do inicio do contrato
--
+### 3. Ciclo de Vida do Contrato (Transaction Lifecycle)
+
+Podemos definir o ciclo de vida do contrato — expandindo o significado para além da representação em banco — como uma transação composta por estados sequenciais: **Início, Meio e Fim**.
+
+*   **Início (TransactionEmpenho)**:
+    *   Fase inicial da transação.
+    *   **Foco**: Reserva de orçamento e formalização do compromisso.
+    *   **Requisitos**: Validação de documentos básicos e verificações técnicas preliminares.
+
+*   **Meio (TransactionLiquidação)**:
+    *   Fase intermediária, de maior complexidade.
+    *   **Foco**: Reconhecimento da dívida após a entrega do bem ou serviço.
+    *   **Requisitos**: Consolidação de maior volume de dados (notas fiscais, medições) e alta necessidade de aferição técnica.
+
+*   **Fim (Pagamento)**:
+    *   Encerramento financeiro da obrigação.
+
+---
+
+### 4. Escopos de Teste e Validação
+
+Exemplos de perguntas críticas que o sistema de validação deve responder para garantir a integridade dos dados:
+
+**Integridade Financeira**
+-   Há pagamentos registrados sem empenhos correspondentes?
+-   Existem contratos cuja soma de pagamentos supera o valor total contratado?
+
+**Integridade Relacional e Temporal**
+-   **Violação de Propriedade (One-to-One)**: Entidades exclusivas (como uma Nota Fiscal específica) estão sendo compartilhadas incorretamente entre múltiplos contratos?
+-   **Coerência Cronológica**:
+    -   A data de emissão da Nota Fiscal é compatível com a vigência do contrato?
+    -   Existem NFs criadas *antes* da assinatura do contrato ou da nota de empenho?
