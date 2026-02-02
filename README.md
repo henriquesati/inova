@@ -55,3 +55,7 @@ python3 sqlhelp.py <nome_tabela>
 
 - Há pagamentos sem empenhos correspondentes?
 - Existem contratos com pagamentos acima do valor total contratado?
+--------- indagações-------
+- essa entidade que tem relação one-to-one ta tendo a propriedade quebrada? Ex: mesma nf compartilhada como comprovante por multiplos contratos
+- data de criação da nf bate com a data de pagamento? Ex: criada antes do inicio do contrato
+-
