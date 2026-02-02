@@ -31,55 +31,55 @@ O banco modela os estágios da despesa pública: **Contratação → Empenho →
 
 As tabelas presentes no banco (conforme dicionário de dados) são:
 
-- `contrato`
-Contrato (1) ──── (N) Empenho
-- `empenho`
-- `liquidacao_nota_fiscal`
-- `nfe`
-- `pagamento`
-- `nfe_pagamento`
-- `fornecedor`
-- `entidade`
+## 📚 Relações entre Entidades do Domínio
 
-📌 Entidade Administrativa
+- `entidade`  
+<span style="color:gray"><strong>Entidade (1) ──── (N) Contrato</strong></span><br>
+<span style="color:gray"><strong>Entidade (1) ──── (N) Empenho</strong></span>
 
-Entidade (1) ──── (N) Contrato<br>
-Entidade (1) ──── (N) Empenho
+---
 
-📌 Fornecedor
+- `fornecedor`  
+<span style="color:gray"><strong>Fornecedor (1) ──── (N) Contrato</strong></span><br>
+<span style="color:gray"><strong>Fornecedor (1) ──── (N) Empenho</strong></span><br>
+<span style="color:gray"><strong>Fornecedor (1) ──── (N) NFe</strong></span>
 
-Fornecedor (1) ──── (N) Contrato<br>
-Fornecedor (1) ──── (N) Empenho<br>
-Fornecedor (1) ──── (N) NFe
+---
 
-📌 Contrato
+- `contrato`  
+<span style="color:gray"><strong>Contrato (1) ──── (N) Empenho</strong></span>
 
-Contrato (1) ──── (N) Empenho
+---
 
-📌 Empenho
+- `empenho`  
+<span style="color:gray"><strong>Empenho (1) ──── (N) LiquidacaoNotaFiscal</strong></span><br>
+<span style="color:gray"><strong>Empenho (1) ──── (N) Pagamento</strong></span>
 
-Empenho (1) ──── (N) LiquidacaoNotaFiscal<br>
-Empenho (1) ──── (N) Pagamento<br>
+---
 
-📌 Liquidação / Nota Fiscal
+- `liquidacao_nota_fiscal`  
+<span style="color:gray"><strong>LiquidacaoNotaFiscal (1) ──── (1) NFe</strong></span>
 
-LiquidacaoNotaFiscal (1) ──── (1) NFe<br>
+---
 
-📌 Nota Fiscal Eletrônica (NFe)
+- `nfe`  
+<span style="color:gray"><strong>NFe (1) ──── (N) NFePagamento</strong></span>
 
-NFe (1) ──── (N) NFePagamento<br>
+---
 
-📌 Pagamento
+- `pagamento`  
+<span style="color:gray"><strong>Pagamento (1) ──── (N) NFePagamento</strong></span>
 
-Pagamento (1) ──── (N) NFePagamento<br>
+---
 
-📌 Relação Indireta (via tabela associativa)<br>
+- `nfe_pagamento`  
+<span style="color:gray"><strong>NFe (N) ──── (N) Pagamento</strong></span>
 
-NFe (N) ──── (N) Pagamento
+---
 
-🔴 Relações 1-to-1 críticas (invariantes de domínio)<br>
+### 🔴 Relações 1-to-1 Críticas (Invariantes de Domínio)
 
-LiquidacaoNotaFiscal (1) ──── (1) NFe
+<span style="color:gray"><strong>LiquidacaoNotaFiscal (1) ──── (1) NFe</strong></span>
 ---
 
 ## 📊 Views (ETL Output)
