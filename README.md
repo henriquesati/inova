@@ -20,7 +20,7 @@ O `sqlhelp.py` é um utilitário de linha de comando para inspecionar rapidament
 make sql+nome_da_tabela
 __Exemplo:__ make sqlnfe
 
-> make sqlnfe
+> make sqlnfe <br>
 > make sql-contrato
 
 ---
@@ -54,9 +54,6 @@ Scripts de feeback visual dos outputs relacionados as pipeline ETL em cada etapa
 
 
 ```bash
-python3 sqlhelp.py <nome_tabela>
-
-
 
 ### 3. Ciclo de Vida do Contrato (Transaction Lifecycle)
 
