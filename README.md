@@ -32,6 +32,7 @@ O banco modela os estágios da despesa pública: **Contratação → Empenho →
 As tabelas presentes no banco (conforme dicionário de dados) são:
 
 - `contrato`
+Contrato (1) ──── (N) Empenho
 - `empenho`
 - `liquidacao_nota_fiscal`
 - `nfe`
