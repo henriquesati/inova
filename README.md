@@ -45,11 +45,14 @@ As tabelas presentes no banco (conforme dicionário de dados) são:
 
 Scripts de feeback visual dos outputs relacionados as pipeline ETL em cada etapa do ciclo de vida da transação.
 
-| Etapa | Comando | Descrição |
-| :--- | :--- | :--- |
-| **Empenho** | `make view-empenhos` | Visualiza extração e validação de empenhos (Contrato -> Empenho). |
-| **Liquidação** | `make view-liquidacao` | Visualiza o fluxo de liquidação (Liquidacao -> NFe). |
-| **Pagamento** | `make view-pagamento` | Visualiza o processamento de pagamentos. |
+- **Empenho**: `make view-empenhos`
+  Visualiza extração e validação de empenhos (Contrato -> Empenho).
+
+- **Liquidação**: `make view-liquidacao`
+  Visualiza o fluxo de liquidação (Liquidacao -> NFe).
+
+- **Pagamento**: `make view-pagamento`
+  Visualiza o processamento de pagamentos.
 
 > **Nota:** Certifique-se de que os scripts correspondentes existam em `/views`.
 
