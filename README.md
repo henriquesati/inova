@@ -40,6 +40,45 @@ As tabelas presentes no banco (conforme dicionário de dados) são:
 - `fornecedor`
 - `entidade`
 
+📌 Entidade Administrativa
+
+Entidade (1) ──── (N) Contrato
+Entidade (1) ──── (N) Empenho
+
+📌 Fornecedor
+
+Fornecedor (1) ──── (N) Contrato
+Fornecedor (1) ──── (N) Empenho
+Fornecedor (1) ──── (N) NFe
+
+📌 Contrato
+
+Contrato (1) ──── (N) Empenho
+
+📌 Empenho
+
+Empenho (1) ──── (N) LiquidacaoNotaFiscal
+Empenho (1) ──── (N) Pagamento
+
+📌 Liquidação / Nota Fiscal
+
+LiquidacaoNotaFiscal (1) ──── (1) NFe
+
+📌 Nota Fiscal Eletrônica (NFe)
+
+NFe (1) ──── (N) NFePagamento
+
+📌 Pagamento
+
+Pagamento (1) ──── (N) NFePagamento
+
+📌 Relação Indireta (via tabela associativa)
+
+NFe (N) ──── (N) Pagamento
+
+🔴 Relações 1-to-1 críticas (invariantes de domínio)
+
+LiquidacaoNotaFiscal (1) ──── (1) NFe
 ---
 
 ## 📊 Views (ETL Output)
@@ -73,6 +112,12 @@ Podemos definir o ciclo de vida do contrato — expandindo o significado para al
     *   Encerramento financeiro da obrigação.
 
 ---
+### Domain validation rules e invariantes
+As validações sãp centralizadas em contextos transacionais imutáveis, permitindo que cada etapa do ciclo da despesa pública tenha invariantes explícitas e auditáveis centralizadas 
+e em referencia ao estagio de vida da transação/objeto. Isso facilita a detecção de anomalias, validações faltantes, e a rastreabilidade do erro e a evolução do domínio sem acoplamento excessivo entre entidades.
+Além disso a abordagem é extremamente orientada Ao paradigma declarativo funcional, tornando o código e sua intenção mais legivle e facil de manter.
+
+-TransactionLiquidacao
 
 ### 4. Escopos de Teste e Validação
 
