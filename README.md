@@ -41,9 +41,7 @@ As tabelas presentes no banco (conforme dicionário de dados) são:
 
 ---
 
-## Como usar
-
-### 1) Consulta direta por nome de tabela
+## Views (`/views')
 
 ```bash
 python3 sqlhelp.py <nome_tabela>
