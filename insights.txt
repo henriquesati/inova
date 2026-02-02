@@ -1,0 +1,2 @@
+embora 'contracts' seja uma entidade separada no banco, acho que dissociar ela da entidade em memória transaction iria adicionar mais complexidade com pouco beneficio. O acoplamento de ntro de empenho não é muito ideal, mas como
+o e escopo dos dados e modelos estão bem fechados sem margem pra expansão, acho que não tem problema.

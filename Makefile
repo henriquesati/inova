@@ -58,3 +58,9 @@ sql%:
 # fallback genérico (permite make sql-nfe, make sql-contrato etc)
 sql-%:
 	$(PYTHON) $(SQLHELP) -$*
+
+# atalho para atualizar documentação
+push-readme:
+	git add README.md
+	git commit -m "docs: update README" || echo "Nada para commitar no README"
+	git push origin master

@@ -50,7 +50,7 @@ As tabelas presentes no banco (conforme dicionário de dados) são:
 python3 sqlhelp.py <nome_tabela>
 
 
-### Escopos de teste
+### 2) Escopos de teste
 **Exemplos de perguntas para investigar** **(você pode e deve criar outras)**:
 
 - Há pagamentos sem empenhos correspondentes?
