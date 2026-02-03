@@ -47,25 +47,38 @@ class Fornecedor:
             return Result.err(f"Erro ao instanciar Fornecedor: {str(e)}")
 
     @staticmethod
-    def get_by_id(id_fornecedor: int) -> Result["Fornecedor"]:
+    def _fetch_raw(id_fornecedor: int) -> Result[tuple]:
+        """Busca o dado cru no banco e retorna (row, description)."""
+        conn = None
+        cursor = None
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM fornecedor WHERE id_fornecedor = %s", (id_fornecedor,))
             row = cursor.fetchone()
-            
-            if not row:
-                 cursor.close()
-                 conn.close()
-                 return Result.err(f"Fornecedor com id {id_fornecedor} não encontrado.")
-
-            columns = [desc[0] for desc in cursor.description]
-            row_dict = dict(zip(columns, row))
-            
-            cursor.close()
-            conn.close()
-            
-            return Fornecedor.from_row(row_dict)
-            
+            description = cursor.description
+            return Result.ok((row, description))
         except Exception as e:
-            return Result.err(f"Erro ao buscar Fornecedor: {str(e)}")
+            return Result.err(f"Erro de conexão/consulta: {str(e)}")
+        finally:
+            if cursor: cursor.close()
+            if conn: conn.close()
+
+    @staticmethod
+    def _validate_db_return(data: tuple) -> Result[dict]:
+        """Valida o retorno do banco: Se row é None, retorna erro. Se ok, mapeia para dict."""
+        row, description = data
+        if row is None:
+             return Result.err("Fornecedor não encontrado.")
+        
+        columns = [desc[0] for desc in description]
+        return Result.ok(dict(zip(columns, row)))
+
+    @staticmethod
+    def get_by_id(id_fornecedor: int) -> Result["Fornecedor"]:
+        """Pipeline declarativo: Fetch -> Validate -> Map"""
+        return (
+            Fornecedor._fetch_raw(id_fornecedor)
+            .bind(Fornecedor._validate_db_return)
+            .bind(Fornecedor.from_row)
+        )

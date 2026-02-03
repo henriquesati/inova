@@ -94,18 +94,18 @@ Scripts de feeback visual dos outputs relacionados as pipeline ETL em cada etapa
 
 ## 🧭 Abordagem
 Adoto um estilo de representação e modelagem orientado à imutabilidade de dados e transformações determinísticas de estado, inspirado em princípios de **Railway Programming**, no qual cada transição ocorre de forma explícita, previsível e validada.  
-Os objetos são tratados como estruturas imutáveis, e qualquer evolução ocorre por meio da geração de novas instâncias derivadas, depois de passar por validações explícitas de contratos, regras de domínio e invariantes, mantendo previsibilidade de estado e reduzindo efeitos colaterais.
+Os objetos são tratados como estruturas imutáveis, e qualquer evolução ocorre por meio da geração de novas instâncias derivadas, que sõ são instanciados depois de passar por validações explícitas de contratos, regras de domínio e invariantes, mantendo previsibilidade de estado e reduzindo efeitos colaterais.
 
 A abordagem se baseou na estruturação de um objeto Transaction que agrupa as entidades relacionadas à execução da despesa pública persistidas no banco de dados. Esse objeto foi fatiado em três instâncias transacionais distintas, cada uma representando um estágio específico do ciclo da despesa, com recortes e adaptações que facilitam a análise e a aplicação de regras diretamente no código.
 
 Como exemplo, o objeto Contrato é incorporado ao contexto da TransactionEmpenho, representando a transação ainda na fase de empenho, na qual a obrigação orçamentária é formalizada, mas a execução financeira ainda não ocorreu.
 
 
-**commitment →** Iniciação do objeto e alocaçãço de recurso  
+**TransactionEmpenho →** Iniciação do objeto e alocaçãço de recursos  
 
-**liquidation →** Inserção de outro objeto recurso, dando origem a outro objeto com outro estado  
+**Transactionliquidation →** Instanciado a partir de TransactionEmpenho após validações e com adição de recursos pertinentes ao atual lifecycle.
 
-**complete →** checagem de boundaries  
+**TransactionComplete →** checagem de boundaries  
 
 Sempre que um objeto composto por dependências é instanciado — como uma Transaction que agrega múltiplas entidades — é seguro assumir que todos os objetos envolvidos já passaram por seus contratos de validação.  
 

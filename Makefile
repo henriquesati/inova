@@ -64,3 +64,7 @@ push-readme:
 	git add README.md
 	git commit -m "docs: update README" || echo "Nada para commitar no README"
 	git push origin master
+
+view-empenhos:
+	$(PYTHON) views/etl_empenhos.py
+
